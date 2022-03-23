@@ -1,0 +1,22 @@
+stages:
+  # FIXME set up not finished
+  to_hdf5:
+    vars:
+      - container:
+          out: /mnt/out
+          ind: /mnt/in
+          inf: TRACMASS_run.csv
+      - ../../params.yaml
+    cmd:
+      singularity run --no-home --cleanenv --containall
+        --bind $(realpath $(dvc root)/../..)/${data.hdf5}:${container.out}:rw
+        --bind $(realpath $(dvc root)/../..)/${data.tracmass_csv}:${container.ind}/${container.inf}:ro
+      ../../src/dians-${package_version}.sif convert_data
+        --tracmass-datadir=${observations.ind}
+        --tracmass-filename=${observations.inf}
+        --output-dir=${container.out}
+    deps:
+      - ../../${data.tracmass_csv}
+      - ../../src/dians-${package_version}.sif
+    outs:
+      - ../../${data.tracmass_hdf5}
